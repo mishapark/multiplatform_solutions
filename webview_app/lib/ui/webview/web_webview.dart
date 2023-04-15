@@ -4,12 +4,10 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-Widget webView(String link) => WebWebview(link: link);
-
-class WebWebview extends StatelessWidget {
+class WebView extends StatelessWidget {
   final String link;
 
-  const WebWebview({super.key, required this.link});
+  const WebView({super.key, required this.link});
 
   @override
   Widget build(BuildContext context) {

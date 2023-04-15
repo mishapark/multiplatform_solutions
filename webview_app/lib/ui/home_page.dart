@@ -1,10 +1,11 @@
-import 'webview/mock_webview.dart'
-    if (dart.library.io) 'webview/nonweb_webview.dart'
+import 'package:webview_app/business/model.dart';
+import 'package:webview_app/business/web_service.dart';
+
+import 'webview/nonweb_webview.dart'
     if (dart.library.html) 'webview/web_webview.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:io';
 
 class MyHomePage extends StatefulWidget {
@@ -16,40 +17,33 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final TextEditingController urlFieldController = TextEditingController();
+  late TextEditingController controller;
+  late WebService service;
   bool isLoading = false;
-  bool isEntered = false;
-  String _htmlTitle = 'Site Title';
-  String _htmlCors = 'CORS Header:';
-  String _htmlText = '';
+  WebModel model = WebModel(title: 'Title', cors: 'CORS', html: 'Empty');
+
+  @override
+  void initState() {
+    super.initState();
+    controller = TextEditingController();
+    service = WebService();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
   void _loadHtmlPage() async {
     setState(() {
       isLoading = true;
     });
 
-    try {
-      final result = await http.get(Uri.parse(urlFieldController.text));
-
-      int titleIndex = result.body.indexOf('<title>');
-      if (titleIndex < 0) {
-        _htmlTitle = '';
-      } else {
-        _htmlTitle = result.body
-            .substring(titleIndex + 7, result.body.indexOf('</title>'))
-            .trim();
-      }
-      _htmlCors = result.headers['access-control-allow-origin'] ?? "None";
-      _htmlText = result.body;
-    } catch (e) {
-      _htmlTitle = 'Site Title';
-      _htmlCors = 'CORS Header:';
-      _htmlText = 'Wrong website';
-    }
+    model = await service.getData(controller.text);
 
     setState(() {
       isLoading = false;
-      isEntered = true;
     });
   }
 
@@ -65,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Padding(
             padding: const EdgeInsets.all(20),
             child: Text(
-              _htmlTitle,
+              model.title,
               style: const TextStyle(
                 fontSize: 25,
                 fontWeight: FontWeight.bold,
@@ -75,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Padding(
             padding: const EdgeInsets.only(left: 20, bottom: 20, right: 20),
             child: Text(
-              _htmlCors,
+              model.cors,
               style: const TextStyle(
                 color: Colors.red,
                 fontSize: 20,
@@ -89,11 +83,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 :
                 // SingleChildScrollView(
                 //     scrollDirection: Axis.vertical,
-                //     child: Text(_htmlText),
+                //     child: Text(model.html),
                 //   ),
-                Container(
-                    child: isEntered ? webView(urlFieldController.text) : null,
-                  ),
+                WebView(
+                    link: controller.text.trim() == ""
+                        ? 'https://flutter.dev'
+                        : controller.text),
           ),
           Container(
             decoration: const BoxDecoration(
@@ -111,7 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         Expanded(
                           flex: 1,
                           child: TextField(
-                            controller: urlFieldController,
+                            controller: controller,
                             decoration: const InputDecoration(
                               contentPadding: EdgeInsets.symmetric(
                                 vertical: 10,

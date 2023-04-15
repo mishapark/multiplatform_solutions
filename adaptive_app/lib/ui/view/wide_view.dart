@@ -1,7 +1,7 @@
-import 'package:adaptive_app/model/user.dart';
-import 'package:adaptive_app/util/menu_items.dart';
-import 'package:adaptive_app/widgets/popup_menu_item.dart';
-import 'package:adaptive_app/widgets/user_card_grid.dart';
+import 'package:adaptive_app/data/user.dart';
+import 'package:adaptive_app/data/menu_items.dart';
+import 'package:adaptive_app/ui/widgets/popup_menu_item.dart';
+import 'package:adaptive_app/ui/widgets/user_card_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:popover/popover.dart';
 
