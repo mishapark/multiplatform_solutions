@@ -1,5 +1,5 @@
-import 'package:webview_app/business/model.dart';
-import 'package:webview_app/business/web_service.dart';
+import 'package:webview_app/data/model.dart';
+import 'package:webview_app/data/web_service.dart';
 
 import 'webview/nonweb_webview.dart'
     if (dart.library.html) 'webview/web_webview.dart';
@@ -19,8 +19,9 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late TextEditingController controller;
   late WebService service;
+  WebModel model = WebModel(title: 'Title', cors: "CORS", html: 'Empty');
   bool isLoading = false;
-  WebModel model = WebModel(title: 'Title', cors: 'CORS', html: 'Empty');
+  bool isValid = false;
 
   @override
   void initState() {
@@ -41,7 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
     model = await service.getData(controller.text);
-
+    isValid = await service.validateLink(controller.text);
     setState(() {
       isLoading = false;
     });
@@ -85,10 +86,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 //     scrollDirection: Axis.vertical,
                 //     child: Text(model.html),
                 //   ),
-                WebView(
-                    link: controller.text.trim() == ""
-                        ? 'https://flutter.dev'
-                        : controller.text),
+                isValid
+                    ? WebView(link: controller.text)
+                    : const Center(
+                        child: Text('Wrong Site'),
+                      ),
           ),
           Container(
             decoration: const BoxDecoration(
